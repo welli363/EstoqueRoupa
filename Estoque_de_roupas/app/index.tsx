@@ -17,6 +17,7 @@ export default function Index() {
   const [senha, setSenha] = useState("");
   const [email, setEmail] = useState("");
   const router = useRouter();
+  const emailValido = /^[a-zA-Z0-9._%+-]+@gmail\.com$/.test(email);
 
   const handleLogin = () => {
     const emailRegex = /^\S+@\S+\.\S+$/;
