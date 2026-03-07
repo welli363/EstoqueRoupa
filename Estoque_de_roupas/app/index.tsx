@@ -19,13 +19,13 @@ export default function Index() {
   const router = useRouter();
 
   const handleLogin = () => {
-    if (email === "/^\S+@\S+\.\S+$/" && senha.trim().length >= 6) {
-      router.replace("/(tabs)")
-  } else {
-      alert("Email ou senha inválidos. Por favor, tente novamente.")
+    const emailRegex = /^\S+@\S+\.\S+$/;
+    if (emailRegex.test(email) && senha.trim().length >= 6) {
+      router.replace("/(tabs)");
+    } else {
+      alert("Email ou senha inválidos. Por favor, tente novamente.");
+    }
   }
-
-}
 
 
 
@@ -42,11 +42,15 @@ export default function Index() {
           { borderColor: emailFocused ? "#8b58e4" : "#ccc" }
         ]}>
             <Fontisto name="email" size={20} color="gray" />
-            <TextInput placeholder="lojista@exemple.com" 
+            <TextInput
+              placeholder="lojista@exemple.com"
               style={styles.input}
-                  onFocus={() => setEmailFocused(true)}
-                  onBlur={() => setEmailFocused(false)}
-
+              value={email}
+              onChangeText={setEmail}
+              onFocus={() => setEmailFocused(true)}
+              onBlur={() => setEmailFocused(false)}
+              keyboardType="email-address"
+              autoCapitalize="none"
             />
         </View>
 
@@ -54,11 +58,14 @@ export default function Index() {
           { borderColor: senhaFocused ? "#8b58e4" : "#ccc" }
         ]}>
             <Entypo name="lock" size={20} color="gray" />
-            <TextInput placeholder="*****"
+            <TextInput
+              placeholder="*****"
               style={styles.input}
-                  onFocus={() => setSenhaFocused(true)}
-                  onBlur={() => setSenhaFocused(false)}
-            
+              value={senha}
+              onChangeText={setSenha}
+              onFocus={() => setSenhaFocused(true)}
+              onBlur={() => setSenhaFocused(false)}
+              secureTextEntry={true}
             />
         </View>
 
