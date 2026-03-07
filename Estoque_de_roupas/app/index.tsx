@@ -4,18 +4,36 @@ import Fontisto from '@expo/vector-icons/Fontisto';
 import Entypo from '@expo/vector-icons/Entypo';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import AntDesign from '@expo/vector-icons/AntDesign';
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import React  from 'react';
+import {useRouter} from "expo-router";
 import {useState} from "react";
 
 
 
 export default function Index() {
   const [emailFocused, setEmailFocused] = useState(false);
-   const [senhaFocused, setSenhaFocused] = useState(false);
+  const [senhaFocused, setSenhaFocused] = useState(false);
+  const [senha, setSenha] = useState("");
+  const [email, setEmail] = useState("");
+  const router = useRouter();
+
+  const handleLogin = () => {
+    if (email === "/^\S+@\S+\.\S+$/" && senha.trim().length >= 6) {
+      router.replace("/(tabs)")
+  } else {
+      alert("Email ou senha inválidos. Por favor, tente novamente.")
+  }
+
+}
+
+
 
   return (
     <View style={styles.container}>
-        <Ionicons name="storefront-sharp" size={24} color="black" />
+        <View style={styles.borderIcon}>
+          <MaterialCommunityIcons name="store-outline" size={40} color="white" style={styles.iconStore}/>
+        </View>
         <View style={styles.containerText}>
             <Text style={styles.textTitle}>Bem-vindo</Text>
             <Text style={styles.textSubTitle}>Acesse para gerenciar seu estoque</Text>
@@ -45,7 +63,7 @@ export default function Index() {
         </View>
 
 
-        <TouchableOpacity style={styles.button}>
+        <TouchableOpacity style={styles.button} onPress={handleLogin}>
             <Text style={styles.textButton}>Entrar na conta</Text>
             <AntDesign name="arrow-right" size={20} color="white" />
         </TouchableOpacity>
@@ -57,7 +75,7 @@ const styles = StyleSheet.create({
   container:{
     flex: 1, 
     alignItems: 'center',
-    margin: 40,
+    margin: 55,
   },
   textTitle:{
     fontFamily: 'Roboto',
@@ -94,7 +112,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     backgroundColor: "#7C3AED",
     padding: 12,
-    borderRadius: 8,
+    borderRadius: 15,
     height: 55,
     width: "90%",
     margin: 10
@@ -103,5 +121,18 @@ const styles = StyleSheet.create({
     color: "white",
     fontWeight:"bold",
     marginRight: 8
+  },
+  iconStore:{
+      justifyContent: 'center',
+      alignItems: 'center',
+      padding: 15,
+      transform: [{ rotate: '-10deg' }]
+  },
+  borderIcon:{
+    borderWidth: 0.5,
+    borderColor: "#7C3AED",
+    backgroundColor: "#7C3AED",
+    borderRadius: 22,
+    transform: [{ rotate: '10deg' }]
   }
 })
