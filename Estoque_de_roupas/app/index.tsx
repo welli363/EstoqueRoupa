@@ -17,7 +17,6 @@ export default function Index() {
   const [senha, setSenha] = useState("");
   const [email, setEmail] = useState("");
   const router = useRouter();
-  const emailValido = /^[a-zA-Z0-9._%+-]+@gmail\.com$/.test(email);
 
   const handleLogin = () => {
     const emailRegex = /^\S+@\S+\.\S+$/;
@@ -33,14 +32,14 @@ export default function Index() {
   return (
     <View style={styles.container}>
         <View style={styles.borderIcon}>
-          <MaterialCommunityIcons name="store-outline" size={40} color="white" style={styles.iconStore}/>
+          <MaterialCommunityIcons name="store-outline" size={40} color="black" style={styles.iconStore}/>
         </View>
         <View style={styles.containerText}>
             <Text style={styles.textTitle}>Bem-vindo</Text>
             <Text style={styles.textSubTitle}>Acesse para gerenciar seu estoque</Text>
         </View>
         <View style={[styles.containerInput,
-          { borderColor: emailFocused ? "#8b58e4" : "#ccc" }
+          { borderColor: emailFocused ? "#ffee00" : "#ccc" }
         ]}>
             <Fontisto name="email" size={20} color="gray" />
             <TextInput
@@ -56,7 +55,7 @@ export default function Index() {
         </View>
 
         <View style={[styles.containerInput,
-          { borderColor: senhaFocused ? "#8b58e4" : "#ccc" }
+          { borderColor: senhaFocused ? "#ffee00" : "#ccc" }
         ]}>
             <Entypo name="lock" size={20} color="gray" />
             <TextInput
@@ -73,7 +72,7 @@ export default function Index() {
 
         <TouchableOpacity style={styles.button} onPress={handleLogin}>
             <Text style={styles.textButton}>Entrar na conta</Text>
-            <AntDesign name="arrow-right" size={20} color="white" />
+            <AntDesign name="arrow-right" size={20} color="black" />
         </TouchableOpacity>
     </View>
   );
@@ -118,7 +117,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#7C3AED",
+    backgroundColor: "#ffee00",
     padding: 12,
     borderRadius: 15,
     height: 55,
@@ -126,7 +125,7 @@ const styles = StyleSheet.create({
     margin: 10
   },
   textButton:{
-    color: "white",
+    color: "black",
     fontWeight:"bold",
     marginRight: 8
   },
@@ -138,8 +137,9 @@ const styles = StyleSheet.create({
   },
   borderIcon:{
     borderWidth: 0.5,
-    borderColor: "#7C3AED",
-    backgroundColor: "#7C3AED",
+    marginTop: 150,
+    borderColor: "#ffee00",
+    backgroundColor: "#ffee00",
     borderRadius: 22,
     transform: [{ rotate: '10deg' }]
   }
