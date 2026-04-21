@@ -6,18 +6,18 @@ import { useColorScheme } from "react-native";
 
 const Colors = {
   light: {
-    text: "#000",
+    text: "#fff",
     background: "#fff",
-    tint: "#8b58e4",
+    tint: "#ffee00",
     tabIconDefault: "#ccc",
-    tabIconSelected: "#8b58e4",
+    tabIconSelected: "#ffee00",
   },
   dark: {
     text: "#fff",
-    background: "#000",
-    tint: "#8b58e4",
+    background: "#fff",
+    tint: "#ffee00",
     tabIconDefault: "#ccc",
-    tabIconSelected: "#8b58e4",
+    tabIconSelected: "#ffee00",
   },
 };
 
