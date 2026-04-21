@@ -7,7 +7,6 @@ import {
   FlatList
 } from "react-native";
 import { useState, useEffect } from "react";
-import AsyncStorage from '@react-native-async-storage/async-storage';
 
 type Produto = {
   id: string;
@@ -18,29 +17,31 @@ type Produto = {
 
 export default function Estoque() {
 
+  const API_URL = 'http://192.168.0.180:3000';
+
   const [nome, setNome] = useState('');
   const [tamanho, setTamanho] = useState('');
   const [quantidade, setQuantidade] = useState('');
   const [produtos, setProdutos] = useState<Produto[]>([]);
 
   // 🔹 CARREGAR
-  useEffect(() => {
-    async function carregarProdutos() {
-      const dados = await AsyncStorage.getItem('produtos');
-      if (dados) {
-        setProdutos(JSON.parse(dados));
-      }
-    }
-    carregarProdutos();
-  }, []);
+useEffect(() => {
+  buscarProdutos();
+}, []);
 
-  // 🔹 SALVAR
-  async function salvarProdutos(lista: Produto[]) {
-    await AsyncStorage.setItem('produtos', JSON.stringify(lista));
+
+async function buscarProdutos() {
+  try {
+    const response = await fetch(`${API_URL}/produtos`);
+    const data = await response.json();
+    setProdutos(data);
+  } catch (error) {
+    console.log('Erro ao buscar:', error);
   }
+}
 
   // 🔹 ADICIONAR
-  function adicionar() {
+  async function adicionar() {
     if (!nome || !tamanho || !quantidade) return;
 
     const novoProduto: Produto = {
@@ -50,23 +51,36 @@ export default function Estoque() {
       quantidade
     };
 
-    const novaLista = [...produtos, novoProduto];
+    try{
+      await fetch(`${API_URL}/produtos`, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'}, body: JSON.stringify(novoProduto)
+      });
 
-    setProdutos(novaLista);
-    salvarProdutos(novaLista);
+     await buscarProdutos();
 
-    setNome('');
-    setTamanho('');
-    setQuantidade('');
+      setNome('');
+      setTamanho('');
+      setQuantidade('');
+
+    }catch (error){
+      console.log('Erro ao adicionar:', error)
+    }
   }
 
   // 🔹 REMOVER
-  function remover(id: string) {
-    const novaLista = produtos.filter((item) => item.id !== id);
+async function remover(id: string) {
+  try {
+    await fetch(`${API_URL}/produtos/${id}`, {
+      method: 'DELETE'
+    });
 
-    setProdutos(novaLista);
-    salvarProdutos(novaLista);
+    await buscarProdutos();
+
+  } catch (error) {
+    console.log('Erro ao remover:', error);
   }
+}
 
   return (
     <View style={styles.container}>
