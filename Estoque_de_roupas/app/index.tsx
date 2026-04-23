@@ -18,12 +18,25 @@ export default function Index() {
   const [email, setEmail] = useState("");
   const router = useRouter();
 
-  const handleLogin = () => {
-    const emailRegex = /^\S+@\S+\.\S+$/;
-    if (emailRegex.test(email) && senha.trim().length >= 6) {
-      router.replace("/(tabs)");
-    } else {
-      alert("Email ou senha inválidos. Por favor, tente novamente.");
+  const handleLogin = async () => {
+    try{
+      const response = await fetch("http://192.168.0.180:3000/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({email, senha})
+      });
+
+      const data = await response.json();
+
+      if(response.ok){
+        router.replace("/(tabs)")
+      }else{
+        alert(data.erro || "Erro ao fazer login")
+      }
+    }catch (error){
+      alert("Erro ao conectar com o servidor")
     }
   }
 
