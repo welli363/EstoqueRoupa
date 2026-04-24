@@ -1,7 +1,8 @@
 const express = require('express');
 const cors = require('cors');
 const pool = require('./config/db');
-const loginRoutes = require('./routes/login');
+const loginRoutes = require('./routes/login.routes');
+const usuarioRoutes = require("./routes/usuario.routes")
 
 const app = express();
 
@@ -9,6 +10,7 @@ app.use(cors());
 app.use(express.json());
 
 // ROTAS
+app.use('/auth', usuarioRoutes);
 app.use('/auth', loginRoutes);
 
 // TESTE
