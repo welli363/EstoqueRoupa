@@ -39,7 +39,11 @@ export default function Index() {
       alert("Erro ao conectar com o servidor")
     }
   }
+  const handleCreateAccount = () => {
+    router.push("/createAccount")
+  }
 
+  
 
 
   return (
@@ -86,6 +90,10 @@ export default function Index() {
         <TouchableOpacity style={styles.button} onPress={handleLogin}>
             <Text style={styles.textButton}>Entrar na conta</Text>
             <AntDesign name="arrow-right" size={20} color="black" />
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.button} onPress={handleCreateAccount}>
+          <Text style={styles.textButton}>Criar conta</Text>
         </TouchableOpacity>
     </View>
   );
@@ -155,5 +163,6 @@ const styles = StyleSheet.create({
     backgroundColor: "#ffee00",
     borderRadius: 22,
     transform: [{ rotate: '10deg' }]
-  }
+  },
+
 })
