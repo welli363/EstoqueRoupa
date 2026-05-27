@@ -6,55 +6,93 @@ import {
   TextInput,
   FlatList
 } from "react-native";
-import { useState, useEffect } from 'react';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useState, useEffect } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 type Movimentacao = {
   id: string;
-  tipo: 'entrada' | 'saida';
+  tipo: "entrada" | "saida";
   descricao: string;
   valor: string;
 };
 
-export default function FinancasScreen() {
+type Produto = {
+  id: string;
+  nome: string;
+  tamanho: string;
+  quantidade: string;
+};
 
-  const [descricao, setDescricao] = useState('');
-  const [valor, setValor] = useState('');
-  const [tipo, setTipo] = useState<'entrada' | 'saida'>('entrada');
+export default function FinancasScreen() {
+  const [descricao, setDescricao] = useState("");
+  const [valor, setValor] = useState("");
+  const [tipo, setTipo] = useState<"entrada" | "saida">("entrada");
   const [movimentacoes, setMovimentacoes] = useState<Movimentacao[]>([]);
+  const [produtos, setProdutos] = useState<Produto[]>([]);
 
   // 🔹 CARREGAR
   useEffect(() => {
     async function carregar() {
-      const dados = await AsyncStorage.getItem('movimentacoes');
-      if (dados) {
-        setMovimentacoes(JSON.parse(dados));
-      }
+      const dados = await AsyncStorage.getItem("movimentacoes");
+      if (dados) setMovimentacoes(JSON.parse(dados));
+
+      const res = await fetch("http://192.168.0.180:3000/produtos");
+      const prod = await res.json();
+      setProdutos(prod);
     }
+
     carregar();
   }, []);
 
-  // 🔹 SALVAR
+  // 🔹 SALVAR MOVIMENTAÇÕES
   async function salvarMovimentacoes(lista: Movimentacao[]) {
-    await AsyncStorage.setItem('movimentacoes', JSON.stringify(lista));
+    await AsyncStorage.setItem(
+      "movimentacoes",
+      JSON.stringify(lista)
+    );
+  }
+
+  // 🔹 ATUALIZAR ESTOQUE NO BACKEND
+  async function atualizarQuantidade(nomeProduto: string, valorVendida: number) {
+    const produto = produtos.find(
+      (p) => p.nome === nomeProduto
+    );
+
+    if (!produto) return;
+
+    const novaQuantidade =
+      Number(produto.quantidade) - valorVendida;
+
+    await fetch(
+      `http://192.168.0.180:3000/produtos/${produto.id}`,
+      {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          quantidade: novaQuantidade,
+        }),
+      }
+    );
   }
 
   // 🔹 SALDO
   const saldo = movimentacoes.reduce((total, item) => {
-    return item.tipo === 'entrada'
+    return item.tipo === "entrada"
       ? total + Number(item.valor)
       : total - Number(item.valor);
   }, 0);
 
   // 🔹 ADICIONAR
-  function adicionarMovimentacao() {
+  async function adicionarMovimentacao() {
     if (!descricao || !valor) return;
 
     const nova: Movimentacao = {
       id: Date.now().toString(),
       tipo,
       descricao,
-      valor
+      valor,
     };
 
     const novaLista = [...movimentacoes, nova];
@@ -62,14 +100,21 @@ export default function FinancasScreen() {
     setMovimentacoes(novaLista);
     salvarMovimentacoes(novaLista);
 
-    setDescricao('');
-    setValor('');
-    setTipo('entrada');
+    // 👉 SE FOR SAÍDA, ATUALIZA ESTOQUE
+    if (tipo === "saida") {
+      await atualizarQuantidade(descricao, Number(valor));
+    }
+
+    setDescricao("");
+    setValor("");
+    setTipo("entrada");
   }
 
   // 🔹 REMOVER
   function remover(id: string) {
-    const novaLista = movimentacoes.filter((item) => item.id !== id);
+    const novaLista = movimentacoes.filter(
+      (item) => item.id !== id
+    );
 
     setMovimentacoes(novaLista);
     salvarMovimentacoes(novaLista);
@@ -85,7 +130,7 @@ export default function FinancasScreen() {
 
       <TextInput
         style={styles.input}
-        placeholder="Descrição"
+        placeholder="Descrição (nome do produto na saída)"
         value={descricao}
         onChangeText={setDescricao}
       />
@@ -100,23 +145,31 @@ export default function FinancasScreen() {
 
       <View style={styles.tipoContainer}>
         <TouchableOpacity
-          onPress={() => setTipo('entrada')}
+          onPress={() => setTipo("entrada")}
           style={[
             styles.tipoBotao,
-            tipo === 'entrada' && { backgroundColor: '#12d404' }
+            tipo === "entrada" && {
+              backgroundColor: "#12d404",
+            },
           ]}
         >
-          <Text style={styles.tipoTexto}>Entrada</Text>
+          <Text style={styles.tipoTexto}>
+            Entrada
+          </Text>
         </TouchableOpacity>
 
         <TouchableOpacity
-          onPress={() => setTipo('saida')}
+          onPress={() => setTipo("saida")}
           style={[
             styles.tipoBotao,
-            tipo === 'saida' && { backgroundColor: '#ee1f1f' }
+            tipo === "saida" && {
+              backgroundColor: "#ee1f1f",
+            },
           ]}
         >
-          <Text style={styles.tipoTexto}>Saída</Text>
+          <Text style={styles.tipoTexto}>
+            Saída
+          </Text>
         </TouchableOpacity>
       </View>
 
@@ -124,7 +177,9 @@ export default function FinancasScreen() {
         onPress={adicionarMovimentacao}
         style={styles.botaoAdicionar}
       >
-        <Text style={styles.botaoTexto}>Adicionar</Text>
+        <Text style={styles.botaoTexto}>
+          Adicionar
+        </Text>
       </TouchableOpacity>
 
       <FlatList
@@ -133,15 +188,24 @@ export default function FinancasScreen() {
         renderItem={({ item }) => (
           <View style={styles.item}>
             <View style={styles.itemInfo}>
-              <Text style={styles.itemTitulo}>{item.descricao}</Text>
-
-              <Text>
-                {item.tipo === 'entrada' ? '🟢 Entrada' : '🔴 Saída'}
+              <Text style={styles.itemTitulo}>
+                {item.descricao}
               </Text>
 
-              <Text style={{
-                color: item.tipo === 'entrada' ? 'green' : 'red'
-              }}>
+              <Text>
+                {item.tipo === "entrada"
+                  ? "🟢 Entrada"
+                  : "🔴 Saída"}
+              </Text>
+
+              <Text
+                style={{
+                  color:
+                    item.tipo === "entrada"
+                      ? "green"
+                      : "red",
+                }}
+              >
                 R$ {item.valor}
               </Text>
             </View>
@@ -150,7 +214,9 @@ export default function FinancasScreen() {
               style={styles.botaoRemover}
               onPress={() => remover(item.id)}
             >
-              <Text style={styles.textoRemover}>X</Text>
+              <Text style={styles.textoRemover}>
+                X
+              </Text>
             </TouchableOpacity>
           </View>
         )}
@@ -253,4 +319,3 @@ const styles = StyleSheet.create({
     fontWeight: 'bold'
   }
 });
- 

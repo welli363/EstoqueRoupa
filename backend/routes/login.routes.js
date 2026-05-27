@@ -13,11 +13,11 @@ router.get("/login", (req, res) => {
 //  LOGIN
 router.post("/login", async (req, res) => {
   try {
-    const { nome, email, senha } = req.body;
+    const {email, senha } = req.body;
 
-    if ( !nome ||!email || !senha) {
+    if (!email || !senha) {
       return res.status(400).json({
-        erro: "Nome, email e senha obrigatórios."
+        erro: "Email e senha obrigatórios."
       });
     }
 

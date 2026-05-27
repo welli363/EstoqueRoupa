@@ -1,6 +1,7 @@
 import { StyleSheet, Text, View } from "react-native";
-import { useEffect, useState } from "react";
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useState, useCallback } from "react";
+import { useFocusEffect } from "@react-navigation/native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 type Produto = {
   id: string;
@@ -11,51 +12,96 @@ type Produto = {
 
 type Movimentacao = {
   id: string;
-  tipo: 'entrada' | 'saida';
+  tipo: "entrada" | "saida";
   descricao: string;
   valor: string;
 };
 
 export default function HomeScreen() {
-
   const [produtos, setProdutos] = useState<Produto[]>([]);
   const [movimentacoes, setMovimentacoes] = useState<Movimentacao[]>([]);
 
-  useEffect(() => {
-    async function carregarDados() {
-      const dadosProdutos = await AsyncStorage.getItem('produtos');
-      const dadosMov = await AsyncStorage.getItem('movimentacoes');
+  async function carregarDados() {
+    try {
+      // PRODUTOS DO BACKEND
+      const respostaProdutos = await fetch(
+        "http://192.168.0.180:3000/produtos"
+      );
 
-      if (dadosProdutos) setProdutos(JSON.parse(dadosProdutos));
-      if (dadosMov) setMovimentacoes(JSON.parse(dadosMov));
+      const dadosProdutos = await respostaProdutos.json();
+
+      setProdutos(dadosProdutos);
+
+      // MOVIMENTAÇÕES DO ASYNC STORAGE
+      const dadosMovimentacao =
+        await AsyncStorage.getItem("movimentacoes");
+
+      if (dadosMovimentacao) {
+        setMovimentacoes(
+          JSON.parse(dadosMovimentacao)
+        );
+      } else {
+        setMovimentacoes([]);
+      }
+
+    } catch (error) {
+      console.log(
+        "Erro ao carregar dados:",
+        error
+      );
     }
+  }
 
-    carregarDados();
-  }, []);
+  // Atualiza sempre que voltar pra Home
+  useFocusEffect(
+    useCallback(() => {
+      carregarDados();
+    }, [])
+  );
 
-  const saldo = movimentacoes.reduce((total, item) => {
-    return item.tipo === 'entrada'
-      ? total + Number(item.valor)
-      : total - Number(item.valor);
-  }, 0);
+  const saldo = movimentacoes.reduce(
+    (total, item) => {
+      return item.tipo === "entrada"
+        ? total + Number(item.valor)
+        : total - Number(item.valor);
+    },
+    0
+  );
 
   return (
     <View style={styles.container}>
-      <Text style={styles.titulo}>Minha Loja</Text>
+      <Text style={styles.titulo}>
+        Minha Loja
+      </Text>
 
       <View style={styles.card}>
-        <Text style={styles.cardTitulo}>📦 Produtos</Text>
-        <Text style={styles.cardValor}>{produtos.length}</Text>
+        <Text style={styles.cardTitulo}>
+          📦 Produtos
+        </Text>
+
+        <Text style={styles.cardValor}>
+          {produtos.length}
+        </Text>
       </View>
 
       <View style={styles.card}>
-        <Text style={styles.cardTitulo}>💰 Saldo</Text>
-        <Text style={styles.cardValor}>R$ {saldo.toFixed(2)}</Text>
+        <Text style={styles.cardTitulo}>
+          💰 Saldo
+        </Text>
+
+        <Text style={styles.cardValor}>
+          R$ {saldo.toFixed(2)}
+        </Text>
       </View>
 
       <View style={styles.card}>
-        <Text style={styles.cardTitulo}>📊 Movimentações</Text>
-        <Text style={styles.cardValor}>{movimentacoes.length}</Text>
+        <Text style={styles.cardTitulo}>
+          📊 Movimentações
+        </Text>
+
+        <Text style={styles.cardValor}>
+          {movimentacoes.length}
+        </Text>
       </View>
     </View>
   );
@@ -64,30 +110,30 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20
+    padding: 20,
   },
 
   titulo: {
     fontSize: 28,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginTop: 30,
-    marginBottom: 20
+    marginBottom: 20,
   },
 
   card: {
     borderWidth: 1,
     borderRadius: 10,
     padding: 15,
-    marginBottom: 10
+    marginBottom: 10,
   },
 
   cardTitulo: {
-    fontSize: 16
+    fontSize: 16,
   },
 
   cardValor: {
     fontSize: 22,
-    fontWeight: 'bold',
-    marginTop: 5
-  }
+    fontWeight: "bold",
+    marginTop: 5,
+  },
 });

@@ -58,6 +58,22 @@ app.post('/produtos', async (req, res) => {
   }
 });
 
+app.put("/produtos/:id", async (req, res) => {
+  try{
+    const {id} = req.params;
+    const {quantidade} = req.body;
+    await pool.query("UPDATE produtos SET quantidade = ? WHERE id = ?", 
+      [quantidade, id]
+    )
+    res.json({ok: true})
+  }catch(err){
+    console.error(err)
+    res.status(500).json({erro: "Erro ao atualizar quantidade"})
+  }
+})
+
+
+
 
 app.delete('/produtos/:id', async (req, res) => {
   try {
