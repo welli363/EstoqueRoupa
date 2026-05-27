@@ -15,6 +15,14 @@ export default function RootLayout() {
           headerShown: false,
         }}
       />
+
+      <Stack.Screen
+        name="createAccount"
+        options={{
+          headerShown: false
+        }}
+      
+      />
     </Stack>
   );
 }

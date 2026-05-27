@@ -72,11 +72,11 @@ router.post("/login", async (req, res) => {
 //  CRIAR USUÁRIO
 router.post("/usuarios", async (req, res) => {
   try {
-    const { email, senha } = req.body;
+    const { nome, email, senha } = req.body;
 
-    if (!email || !senha) {
+    if (!nome || !email || !senha) {
       return res.status(400).json({
-        erro: "Email e senha obrigatórios."
+        erro: "Nome, email e senha obrigatórios."
       });
     }
 
@@ -95,8 +95,8 @@ router.post("/usuarios", async (req, res) => {
     const senhaHash = await bcrypt.hash(senha, 10);
 
     await pool.query(
-      "INSERT INTO usuarios (email, senha_hash) VALUES (?, ?)",
-      [email, senhaHash]
+      "INSERT INTO usuarios (nome, email, senha_hash) VALUES (?, ?, ?)",
+      [nome, email, senhaHash]
     );
 
     return res.status(201).json({
