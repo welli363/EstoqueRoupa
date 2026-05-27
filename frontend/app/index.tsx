@@ -12,6 +12,7 @@ import {useState} from "react";
 
 
 export default function Index() {
+  const [mostrarSenha, setMostrarSenha] = useState(false);
   const [emailFocused, setEmailFocused] = useState(false);
   const [senhaFocused, setSenhaFocused] = useState(false);
   const [senha, setSenha] = useState("");
@@ -82,12 +83,22 @@ export default function Index() {
               onChangeText={setSenha}
               onFocus={() => setSenhaFocused(true)}
               onBlur={() => setSenhaFocused(false)}
-              secureTextEntry={true}
+              secureTextEntry={mostrarSenha} 
             />
+            <TouchableOpacity
+            onPress={() => setMostrarSenha(!mostrarSenha)}
+            style={styles.eyeButton}
+        >
+              <Ionicons
+                name={mostrarSenha ? "eye-outline" : "eye-off-outline"}
+                size={20}
+                color="gray"
+              />
+            </TouchableOpacity>
         </View>
 
 
-        <TouchableOpacity style={styles.button} onPress={handleLogin}>
+        <TouchableOpacity style={styles.button} onPress={handleLogin} >
             <Text style={styles.textButton}>Entrar na conta</Text>
             <AntDesign name="arrow-right" size={20} color="black" />
         </TouchableOpacity>
@@ -164,5 +175,8 @@ const styles = StyleSheet.create({
     borderRadius: 22,
     transform: [{ rotate: '10deg' }]
   },
+  eyeButton:{
+    padding: 5,   
+  }
 
 })

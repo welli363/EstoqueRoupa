@@ -17,70 +17,89 @@ type Produto = {
 
 export default function Estoque() {
 
-  const API_URL = 'http://192.168.0.180:3000';
+  const API_URL = "http://192.168.0.180:3000";
 
-  const [nome, setNome] = useState('');
-  const [tamanho, setTamanho] = useState('');
-  const [quantidade, setQuantidade] = useState('');
+  const [nome, setNome] = useState("");
+  const [tamanho, setTamanho] = useState("");
+  const [quantidade, setQuantidade] = useState("");
   const [produtos, setProdutos] = useState<Produto[]>([]);
 
   // 🔹 CARREGAR
-useEffect(() => {
-  buscarProdutos();
-}, []);
+  useEffect(() => {
+    buscarProdutos();
+  }, []);
 
-
-async function buscarProdutos() {
-  try {
-    const response = await fetch(`${API_URL}/produtos`);
-    const data = await response.json();
-    setProdutos(data);
-  } catch (error) {
-    console.log('Erro ao buscar:', error);
+  async function buscarProdutos() {
+    try {
+      const response = await fetch(`${API_URL}/produtos`);
+      const data = await response.json();
+      setProdutos(data);
+    } catch (error) {
+      console.log("Erro ao buscar:", error);
+    }
   }
-}
 
   // 🔹 ADICIONAR
   async function adicionar() {
     if (!nome || !tamanho || !quantidade) return;
 
-    const novoProduto: Produto = {
-      id: Date.now().toString(),
-      nome,
-      tamanho,
-      quantidade
-    };
-
-    try{
+    try {
       await fetch(`${API_URL}/produtos`, {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'}, body: JSON.stringify(novoProduto)
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          nome,
+          tamanho,
+          quantidade: Number(quantidade)
+        })
       });
 
-     await buscarProdutos();
+      await buscarProdutos();
 
-      setNome('');
-      setTamanho('');
-      setQuantidade('');
+      setNome("");
+      setTamanho("");
+      setQuantidade("");
 
-    }catch (error){
-      console.log('Erro ao adicionar:', error)
+    } catch (error) {
+      console.log("Erro ao adicionar:", error);
+    }
+  }
+
+  // 🔥 ATUALIZAR QUANTIDADE (AGORA USADA DE VERDADE)
+  async function atualizarQuantidade(produto: Produto, novaQtd: number) {
+    try {
+      await fetch(`${API_URL}/produtos/${produto.id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          quantidade: novaQtd
+        })
+      });
+
+      await buscarProdutos();
+
+    } catch (error) {
+      console.log("Erro ao atualizar:", error);
     }
   }
 
   // 🔹 REMOVER
-async function remover(id: string) {
-  try {
-    await fetch(`${API_URL}/produtos/${id}`, {
-      method: 'DELETE'
-    });
+  async function remover(id: string) {
+    try {
+      await fetch(`${API_URL}/produtos/${id}`, {
+        method: "DELETE"
+      });
 
-    await buscarProdutos();
+      await buscarProdutos();
 
-  } catch (error) {
-    console.log('Erro ao remover:', error);
+    } catch (error) {
+      console.log("Erro ao remover:", error);
+    }
   }
-}
 
   return (
     <View style={styles.container}>
@@ -109,7 +128,7 @@ async function remover(id: string) {
       />
 
       <TouchableOpacity onPress={adicionar} style={styles.button}>
-        <Text style={{ textAlign: 'center', fontWeight: 'bold' }}>
+        <Text style={{ textAlign: "center", fontWeight: "bold" }}>
           Adicionar
         </Text>
       </TouchableOpacity>
@@ -120,26 +139,46 @@ async function remover(id: string) {
         renderItem={({ item }) => (
           <View style={styles.item}>
             <View>
-              <Text style={{ fontWeight: 'bold' }}>{item.nome}</Text>
+              <Text style={{ fontWeight: "bold" }}>{item.nome}</Text>
               <Text>Tamanho: {item.tamanho}</Text>
               <Text>Qtd: {item.quantidade}</Text>
             </View>
 
-            <TouchableOpacity
-              onPress={() => remover(item.id)}
-              style={styles.botaoRemover}
-            >
-              <Text style={{ color: 'white', fontWeight: 'bold' }}>
-                Remover
-              </Text>
-            </TouchableOpacity>
+            <View style={{ gap: 8 }}>
+              {/* 🔥 BOTÃO DE VENDER (DIMINUI ESTOQUE) */}
+              <TouchableOpacity
+                onPress={() => {
+                  const novaQtd =
+                    Number(item.quantidade) - 1;
+
+                  if (novaQtd < 0) return;
+
+                  atualizarQuantidade(item, novaQtd);
+                }}
+                style={[styles.botaoRemover, { backgroundColor: "green" }]}
+              >
+                <Text style={{ color: "white", fontWeight: "bold" }}>
+                  -1
+                </Text>
+              </TouchableOpacity>
+
+              {/* REMOVER */}
+              <TouchableOpacity
+                onPress={() => remover(item.id)}
+                style={styles.botaoRemover}
+              >
+                <Text style={{ color: "white", fontWeight: "bold" }}>
+                  X
+                </Text>
+              </TouchableOpacity>
+            </View>
+
           </View>
         )}
       />
     </View>
   );
 }
-
 const styles = StyleSheet.create({
       container: {
         flex: 1,

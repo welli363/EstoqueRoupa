@@ -174,7 +174,10 @@ export default function FinancasScreen() {
       </View>
 
       <TouchableOpacity
-        onPress={adicionarMovimentacao}
+        onPress={() => {
+          adicionarMovimentacao();
+          atualizarQuantidade(descricao, Number(valor));
+        }}
         style={styles.botaoAdicionar}
       >
         <Text style={styles.botaoTexto}>
